@@ -429,8 +429,9 @@
   function periodStartIso(period) {
     const [y, m] = todayIso().split("-").map(Number);
     if (period === "year") return y + "-01-01";
-    if (period === "6month") {
-      let sm = m - 5;
+    if (period === "3month" || period === "6month") {
+      const back = period === "3month" ? 2 : 5;
+      let sm = m - back;
       let sy = y;
       while (sm <= 0) {
         sm += 12;
@@ -480,6 +481,7 @@
   function periodLabel(period) {
     if (period === "year") return "this year";
     if (period === "6month") return "the last 6 months";
+    if (period === "3month") return "the last 3 months";
     return "this month";
   }
 
