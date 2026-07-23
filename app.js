@@ -576,10 +576,12 @@
   el.form.addEventListener("submit", (e) => {
     e.preventDefault();
     const name = el.name.value.trim();
-    const calories = parseInt(el.calories.value, 10);
-    if (!name || isNaN(calories) || calories < 0) return;
     const proteinVal = parseInt(el.protein.value, 10);
-    const protein = isNaN(proteinVal) || proteinVal < 0 ? 0 : proteinVal;
+    // Require a name and a valid protein value; other fields stay optional.
+    if (!name || isNaN(proteinVal) || proteinVal < 0) return;
+    const protein = proteinVal;
+    const caloriesVal = parseInt(el.calories.value, 10);
+    const calories = isNaN(caloriesVal) || caloriesVal < 0 ? 0 : caloriesVal;
     const carbsVal = parseInt(el.carbs.value, 10);
     const carbs = isNaN(carbsVal) || carbsVal < 0 ? 0 : carbsVal;
     const fatVal = parseFloat(el.fat.value);
