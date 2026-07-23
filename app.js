@@ -7,6 +7,7 @@
   const FAT_GOAL_KEY = "cal-fat-goal";
   const SALT_GOAL_KEY = "cal-salt-goal";
   const CARBS_GOAL_KEY = "cal-carbs-goal";
+  const WEIGHT_PREFIX = "wt-";
 
   const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -57,6 +58,13 @@
     weekEmpty: document.getElementById("weekEmpty"),
     exportExcel: document.getElementById("exportExcel"),
     clearDay: document.getElementById("clearDay"),
+    weightForm: document.getElementById("weightForm"),
+    weightInput: document.getElementById("weightInput"),
+    weightCurrent: document.getElementById("weightCurrent"),
+    weightDayChange: document.getElementById("weightDayChange"),
+    weight7Change: document.getElementById("weight7Change"),
+    weightList: document.getElementById("weightList"),
+    weightEmpty: document.getElementById("weightEmpty"),
     scanBtn: document.getElementById("scanBtn"),
     themeToggle: document.getElementById("themeToggle"),
     scanModal: document.getElementById("scanModal"),
@@ -217,6 +225,7 @@
 
     renderTimeline();
     renderWeek();
+    renderWeight();
   }
 
   function collectPastDays() {
@@ -411,6 +420,131 @@
     el.weekEmpty.style.display = logged.length ? "none" : "block";
   }
 
+  const weightKey = (iso) => WEIGHT_PREFIX + iso;
+
+  function loadWeight(iso) {
+    const v = load(weightKey(iso), null);
+    return typeof v === "number" && v > 0 ? v : null;
+  }
+
+  function collectWeights() {
+    const out = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith(WEIGHT_PREFIX)) continue;
+      const date = key.slice(WEIGHT_PREFIX.length);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      let v;
+      try {
+        v = JSON.parse(localStorage.getItem(key));
+      } catch (e) {
+        continue;
+      }
+      if (typeof v !== "number" || v <= 0) continue;
+      out.push({ date, weight: v });
+    }
+    out.sort((a, b) => (a.date < b.date ? -1 : 1)); // oldest first
+    return out;
+  }
+
+  function describeChange(delta, suffix) {
+    const d = round1(delta);
+    if (d === 0) return { cls: "same", text: "No change" + suffix };
+    const verb = d > 0 ? "Gained" : "Lost";
+    return { cls: d > 0 ? "gain" : "loss", text: verb + " " + Math.abs(d) + " kg" + suffix };
+  }
+
+  function fmtDayLabel(date) {
+    return new Date(date + "T00:00:00").toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  function renderWeight() {
+    const iso = new Date().toISOString().slice(0, 10);
+    const todays = loadWeight(iso);
+    if (document.activeElement !== el.weightInput) {
+      el.weightInput.value = todays != null ? todays : "";
+    }
+
+    const all = collectWeights();
+    el.weightEmpty.style.display = all.length ? "none" : "block";
+    el.weightList.innerHTML = "";
+
+    if (!all.length) {
+      el.weightCurrent.textContent = "–";
+      el.weightDayChange.textContent = "";
+      el.weightDayChange.className = "weight-change";
+      el.weight7Change.textContent = "";
+      el.weight7Change.className = "weight-change";
+      return;
+    }
+
+    const latest = all[all.length - 1];
+    el.weightCurrent.textContent = round1(latest.weight);
+
+    // Day-over-day change: latest weigh-in vs the previous one
+    if (all.length >= 2) {
+      const prev = all[all.length - 2];
+      const c = describeChange(latest.weight - prev.weight, " since " + fmtDayLabel(prev.date));
+      el.weightDayChange.className = "weight-change " + c.cls;
+      el.weightDayChange.textContent = c.text;
+    } else {
+      el.weightDayChange.className = "weight-change";
+      el.weightDayChange.textContent = "First weigh-in logged — nothing to compare yet.";
+    }
+
+    // Net change over the last 7 days
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 6);
+    const cutoffIso = cutoff.toISOString().slice(0, 10);
+    const window7 = all.filter((w) => w.date >= cutoffIso);
+    if (window7.length >= 2) {
+      const c = describeChange(
+        window7[window7.length - 1].weight - window7[0].weight,
+        " over the last 7 days"
+      );
+      el.weight7Change.className = "weight-change " + c.cls;
+      el.weight7Change.textContent = c.text;
+    } else {
+      el.weight7Change.className = "weight-change muted";
+      el.weight7Change.textContent = "Log 2+ weigh-ins in a week to see your 7-day change.";
+    }
+
+    // Recent weigh-ins (newest first) with per-day delta
+    const recent = all.slice(-7);
+    for (let i = recent.length - 1; i >= 0; i--) {
+      const w = recent[i];
+      const li = document.createElement("li");
+
+      const dateSpan = document.createElement("span");
+      dateSpan.className = "w-date";
+      dateSpan.textContent = fmtDayLabel(w.date);
+
+      const kg = document.createElement("span");
+      kg.className = "w-kg";
+      kg.textContent = round1(w.weight) + " kg";
+
+      li.append(dateSpan, kg);
+
+      const idxAll = all.indexOf(w);
+      if (idxAll > 0) {
+        const c = describeChange(w.weight - all[idxAll - 1].weight, "");
+        const delta = document.createElement("span");
+        delta.className = "w-delta " + c.cls;
+        delta.textContent =
+          c.cls === "same"
+            ? "0 kg"
+            : (c.cls === "gain" ? "▲ " : "▼ ") + Math.abs(round1(w.weight - all[idxAll - 1].weight)) + " kg";
+        li.append(delta);
+      }
+
+      el.weightList.appendChild(li);
+    }
+  }
+
   el.today.textContent = new Date().toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
@@ -479,6 +613,19 @@
       save();
       render();
     }
+  });
+
+  el.weightForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const iso = new Date().toISOString().slice(0, 10);
+    const v = parseFloat(el.weightInput.value);
+    if (isNaN(v) || v <= 0) {
+      localStorage.removeItem(weightKey(iso));
+    } else {
+      localStorage.setItem(weightKey(iso), JSON.stringify(round1(v)));
+    }
+    el.weightInput.blur();
+    renderWeight();
   });
 
   function csvCell(value) {

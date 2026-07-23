@@ -118,6 +118,27 @@
       <p class="empty" id="empty">No food logged yet.</p>
     </section>
 
+    <section class="weight">
+      <h2>Weight</h2>
+      <form id="weightForm" class="weight-form">
+        <input type="number" id="weightInput" min="0" step="0.1" placeholder="Today's weight (kg)" />
+        <button type="submit">Save</button>
+      </form>
+
+      <div class="weight-status">
+        <div class="weight-current">
+          <span id="weightCurrent">–</span><small> kg</small>
+        </div>
+        <div class="weight-changes">
+          <p class="weight-change" id="weightDayChange"></p>
+          <p class="weight-change" id="weight7Change"></p>
+        </div>
+      </div>
+
+      <ul id="weightList" class="weight-list"></ul>
+      <p class="empty" id="weightEmpty">No weight logged yet.</p>
+    </section>
+
     <section class="week">
       <h2>Last 7 days</h2>
       <div class="week-avg">
