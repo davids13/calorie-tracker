@@ -65,6 +65,7 @@
     restoreData: document.getElementById("restoreData"),
     restoreFile: document.getElementById("restoreFile"),
     scanBtn: document.getElementById("scanBtn"),
+    toast: document.getElementById("toast"),
     themeToggle: document.getElementById("themeToggle"),
     scanModal: document.getElementById("scanModal"),
     scanClose: document.getElementById("scanClose"),
@@ -573,6 +574,16 @@
     day: "numeric",
   });
 
+  let toastTimer = null;
+  function showToast(message) {
+    el.toast.textContent = message;
+    el.toast.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      el.toast.classList.remove("show");
+    }, 2200);
+  }
+
   el.form.addEventListener("submit", (e) => {
     e.preventDefault();
     const name = el.name.value.trim();
@@ -593,6 +604,7 @@
     render();
     el.form.reset();
     el.name.focus();
+    showToast("✓ Added " + name);
   });
 
   el.goal.addEventListener("change", () => {
