@@ -39,6 +39,15 @@ Notes:
 - Restore **replaces** matching data on the target device, so back that device up first if it has data you want to keep.
 - This is a manual, file-based transfer — there is no automatic real-time sync (that would require an external service or backend).
 
+## Responsive design
+The layout is mobile-first and adapts across screen sizes (feature: `make-mobile-responsive`):
+- **Safe-area support** — `viewport-fit=cover` plus `env(safe-area-inset-*)` padding so content clears notches and rounded corners on modern phones
+- **Comfortable touch targets** — buttons and controls have a minimum 44px tap size, with `touch-action: manipulation` to avoid double-tap zoom delays
+- **Phones (≤480px)** — the add-food form collapses to a single column, goal and weekly-average grids switch to two columns, inputs use a 16px font to prevent iOS auto-zoom on focus, the footer wraps, and the barcode entry stacks
+- **Small phones (≤360px)** — grids collapse to a single column and list rows tighten up
+- **Landscape / short screens** — vertical spacing and chart height are reduced so controls stay reachable
+- **Tablets (≥700px)** — the card widens slightly for more breathing room
+
 ## Files
 - `index.html` — markup
 - `styles.css` — styling
