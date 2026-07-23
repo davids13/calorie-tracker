@@ -6,6 +6,7 @@
   const PROTEIN_GOAL_KEY = "cal-protein-goal";
   const FAT_GOAL_KEY = "cal-fat-goal";
   const SALT_GOAL_KEY = "cal-salt-goal";
+  const CARBS_GOAL_KEY = "cal-carbs-goal";
 
   const round1 = (n) => Math.round(n * 10) / 10;
 
@@ -34,6 +35,12 @@
     saltBar: document.getElementById("saltBar"),
     saltGoal: document.getElementById("saltGoal"),
     salt: document.getElementById("salt"),
+    carbsConsumed: document.getElementById("carbsConsumed"),
+    carbsGoalLabel: document.getElementById("carbsGoalLabel"),
+    carbsRemaining: document.getElementById("carbsRemaining"),
+    carbsBar: document.getElementById("carbsBar"),
+    carbsGoal: document.getElementById("carbsGoal"),
+    carbs: document.getElementById("carbs"),
     form: document.getElementById("foodForm"),
     name: document.getElementById("name"),
     calories: document.getElementById("calories"),
@@ -43,6 +50,9 @@
     timelineEmpty: document.getElementById("timelineEmpty"),
     avgCal: document.getElementById("avgCal"),
     avgProtein: document.getElementById("avgProtein"),
+    avgCarbs: document.getElementById("avgCarbs"),
+    avgFat: document.getElementById("avgFat"),
+    avgSalt: document.getElementById("avgSalt"),
     chart: document.getElementById("chart"),
     weekEmpty: document.getElementById("weekEmpty"),
     exportExcel: document.getElementById("exportExcel"),
@@ -63,6 +73,7 @@
   let proteinGoal = load(PROTEIN_GOAL_KEY, 120);
   let fatGoal = load(FAT_GOAL_KEY, 70);
   let saltGoal = load(SALT_GOAL_KEY, 6);
+  let carbsGoal = load(CARBS_GOAL_KEY, 250);
 
   function load(key, fallback) {
     try {
@@ -78,6 +89,7 @@
     localStorage.setItem(PROTEIN_GOAL_KEY, JSON.stringify(proteinGoal));
     localStorage.setItem(FAT_GOAL_KEY, JSON.stringify(fatGoal));
     localStorage.setItem(SALT_GOAL_KEY, JSON.stringify(saltGoal));
+    localStorage.setItem(CARBS_GOAL_KEY, JSON.stringify(carbsGoal));
   }
 
   function render() {
@@ -110,6 +122,19 @@
     el.proteinRemaining.textContent = pDiff >= 0
       ? pDiff + " g remaining"
       : Math.abs(pDiff) + " g over goal";
+
+    const carbsTotal = entries.reduce((s, e) => s + (e.carbs || 0), 0);
+    el.carbsConsumed.textContent = carbsTotal;
+    el.carbsGoalLabel.textContent = carbsGoal;
+    el.carbsGoal.value = carbsGoal;
+
+    const cPct = carbsGoal > 0 ? Math.min((carbsTotal / carbsGoal) * 100, 100) : 0;
+    el.carbsBar.style.width = cPct + "%";
+
+    const cDiff = carbsGoal - carbsTotal;
+    el.carbsRemaining.textContent = cDiff >= 0
+      ? cDiff + " g remaining"
+      : Math.abs(cDiff) + " g over goal";
 
     const fatTotal = round1(entries.reduce((s, e) => s + (e.fat || 0), 0));
     el.fatConsumed.textContent = fatTotal;
@@ -166,6 +191,12 @@
         protein.textContent = entry.protein + "g P";
         li.append(protein);
       }
+      if (entry.carbs) {
+        const carbs = document.createElement("span");
+        carbs.className = "carbs-tag";
+        carbs.textContent = entry.carbs + "g C";
+        li.append(carbs);
+      }
       if (entry.fat) {
         const fat = document.createElement("span");
         fat.className = "fat-tag";
@@ -210,9 +241,10 @@
 
       const calories = items.reduce((s, e) => s + (e.calories || 0), 0);
       const protein = items.reduce((s, e) => s + (e.protein || 0), 0);
+      const carbs = items.reduce((s, e) => s + (e.carbs || 0), 0);
       const fat = round1(items.reduce((s, e) => s + (e.fat || 0), 0));
       const salt = round1(items.reduce((s, e) => s + (e.salt || 0), 0));
-      days.push({ date, calories, protein, fat, salt, items });
+      days.push({ date, calories, protein, carbs, fat, salt, items });
     }
 
     days.sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -264,6 +296,10 @@
       proteinNote.className = "protein-note";
       proteinNote.textContent = d.protein + "g P";
 
+      const carbsNote = document.createElement("span");
+      carbsNote.className = "carbs-note";
+      carbsNote.textContent = d.carbs + "g C";
+
       const fatNote = document.createElement("span");
       fatNote.className = "fat-note";
       fatNote.textContent = d.fat + "g F";
@@ -272,7 +308,7 @@
       saltNote.className = "salt-note";
       saltNote.textContent = d.salt + "g S";
 
-      macros.append(barWrap, proteinNote, fatNote, saltNote);
+      macros.append(barWrap, proteinNote, carbsNote, fatNote, saltNote);
 
       const details = document.createElement("div");
       details.className = "day-details";
@@ -284,6 +320,7 @@
         n.textContent =
           item.name +
           (item.protein ? " · " + item.protein + "g P" : "") +
+          (item.carbs ? " · " + item.carbs + "g C" : "") +
           (item.fat ? " · " + item.fat + "g F" : "") +
           (item.salt ? " · " + item.salt + "g S" : "");
         const c = document.createElement("span");
@@ -320,20 +357,24 @@
         // include today's live totals
         const cal = entries.reduce((s, e) => s + (e.calories || 0), 0);
         const prot = entries.reduce((s, e) => s + (e.protein || 0), 0);
-        day = { date: key, calories: cal, protein: prot };
+        const carbs = entries.reduce((s, e) => s + (e.carbs || 0), 0);
+        const fat = round1(entries.reduce((s, e) => s + (e.fat || 0), 0));
+        const salt = round1(entries.reduce((s, e) => s + (e.salt || 0), 0));
+        day = { date: key, calories: cal, protein: prot, carbs: carbs, fat: fat, salt: salt };
       }
-      last7.push(day || { date: key, calories: 0, protein: 0 });
+      last7.push(day || { date: key, calories: 0, protein: 0, carbs: 0, fat: 0, salt: 0 });
     }
 
     const logged = last7.filter((d) => d.calories > 0);
-    const avgCal = logged.length
-      ? Math.round(logged.reduce((s, d) => s + d.calories, 0) / logged.length)
-      : 0;
-    const avgProtein = logged.length
-      ? Math.round(logged.reduce((s, d) => s + d.protein, 0) / logged.length)
-      : 0;
-    el.avgCal.textContent = avgCal;
-    el.avgProtein.textContent = avgProtein;
+    const avg = (key) =>
+      logged.length
+        ? Math.round(logged.reduce((s, d) => s + (d[key] || 0), 0) / logged.length)
+        : 0;
+    el.avgCal.textContent = avg("calories");
+    el.avgProtein.textContent = avg("protein");
+    el.avgCarbs.textContent = avg("carbs");
+    el.avgFat.textContent = avg("fat");
+    el.avgSalt.textContent = avg("salt");
 
     const maxCal = Math.max(goal || 0, ...last7.map((d) => d.calories), 1);
 
@@ -352,7 +393,9 @@
       const over = goal > 0 && d.calories > goal;
       bar.className = "col-bar" + (d.calories === 0 ? " empty-day" : over ? " over" : "");
       bar.style.height = Math.round((d.calories / maxCal) * 100) + "%";
-      bar.title = d.calories + " kcal, " + d.protein + "g protein";
+      bar.title =
+        d.calories + " kcal · " + (d.protein || 0) + "g P · " +
+        (d.carbs || 0) + "g C · " + (d.fat || 0) + "g F · " + (d.salt || 0) + "g S";
       track.appendChild(bar);
 
       const label = document.createElement("span");
@@ -382,11 +425,13 @@
     if (!name || isNaN(calories) || calories < 0) return;
     const proteinVal = parseInt(el.protein.value, 10);
     const protein = isNaN(proteinVal) || proteinVal < 0 ? 0 : proteinVal;
+    const carbsVal = parseInt(el.carbs.value, 10);
+    const carbs = isNaN(carbsVal) || carbsVal < 0 ? 0 : carbsVal;
     const fatVal = parseFloat(el.fat.value);
     const fat = isNaN(fatVal) || fatVal < 0 ? 0 : round1(fatVal);
     const saltVal = parseFloat(el.salt.value);
     const salt = isNaN(saltVal) || saltVal < 0 ? 0 : round1(saltVal);
-    entries.push({ name, calories, protein, fat, salt });
+    entries.push({ name, calories, protein, carbs, fat, salt });
     save();
     render();
     el.form.reset();
@@ -403,6 +448,13 @@
   el.proteinGoal.addEventListener("change", () => {
     const v = parseInt(el.proteinGoal.value, 10);
     proteinGoal = isNaN(v) || v < 0 ? 0 : v;
+    save();
+    render();
+  });
+
+  el.carbsGoal.addEventListener("change", () => {
+    const v = parseInt(el.carbsGoal.value, 10);
+    carbsGoal = isNaN(v) || v < 0 ? 0 : v;
     save();
     render();
   });
@@ -443,6 +495,7 @@
         date: today,
         calories: entries.reduce((s, e) => s + (e.calories || 0), 0),
         protein: entries.reduce((s, e) => s + (e.protein || 0), 0),
+        carbs: entries.reduce((s, e) => s + (e.carbs || 0), 0),
         fat: round1(entries.reduce((s, e) => s + (e.fat || 0), 0)),
         salt: round1(entries.reduce((s, e) => s + (e.salt || 0), 0)),
         items: entries,
@@ -455,12 +508,12 @@
       return;
     }
 
-    const rows = [["Date", "Food", "Calories", "Protein (g)", "Fat (g)", "Salt (g)"]];
+    const rows = [["Date", "Food", "Calories", "Protein (g)", "Carbs (g)", "Fat (g)", "Salt (g)"]];
     allDays.forEach((d) => {
       d.items.forEach((item) => {
-        rows.push([d.date, item.name, item.calories || 0, item.protein || 0, item.fat || 0, item.salt || 0]);
+        rows.push([d.date, item.name, item.calories || 0, item.protein || 0, item.carbs || 0, item.fat || 0, item.salt || 0]);
       });
-      rows.push([d.date, "TOTAL", d.calories, d.protein, d.fat, d.salt]);
+      rows.push([d.date, "TOTAL", d.calories, d.protein, d.carbs, d.fat, d.salt]);
     });
 
     const csv = rows.map((r) => r.map(csvCell).join(",")).join("\r\n");
@@ -595,12 +648,14 @@
         "Product " + barcode;
       const kcal = n["energy-kcal_100g"];
       const protein = n["proteins_100g"];
+      const carbs = n["carbohydrates_100g"];
       const fat = n["fat_100g"];
       const salt = n["salt_100g"];
 
       el.name.value = name + " (per 100g)";
       if (kcal != null) el.calories.value = Math.round(kcal);
       if (protein != null) el.protein.value = Math.round(protein);
+      if (carbs != null) el.carbs.value = Math.round(carbs);
       if (fat != null) el.fat.value = round1(fat);
       if (salt != null) el.salt.value = round1(salt);
 

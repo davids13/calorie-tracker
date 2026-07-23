@@ -3,13 +3,13 @@
 A simple, dependency-free calorie tracking web app. No build step, no server, no accounts.
 
 ## Features
-- Add foods with a name, calorie count, protein, fat, and salt (grams)
-- See total calories, protein, fat, and salt consumed vs. your daily goals, each with a progress bar
-- Editable daily calorie, protein, fat, and salt goals
+- Add foods with a name, calorie count, protein, carbs, fat, and salt (grams)
+- See total calories, protein, carbs, fat, and salt consumed vs. your daily goals, each with a progress bar
+- Editable daily calorie, protein, carbs, fat, and salt goals
 - Delete individual entries or clear the whole day
 - **Last 7 days** view: average calories/protein per logged day, plus a bar chart of daily calories (today included)
 - **Timeline** of past days showing each day's total calories (with a mini progress bar vs. your goal) and total protein — tap a day to expand and see its individual foods
-- **Barcode scanning** — scan a product barcode with your camera (or type the number) to auto-fill name, calories, protein, fat, and salt from the free [Open Food Facts](https://world.openfoodfacts.org) database
+- **Barcode scanning** — scan a product barcode with your camera (or type the number) to auto-fill name, calories, protein, carbs, fat, and salt from the free [Open Food Facts](https://world.openfoodfacts.org) database
 - **Export to Excel** — download all logged data (every day, per food + daily totals) as a CSV file that opens directly in Excel
 - **Light / dark theme** — toggle the 🌙/☀️ button in the header; your choice is remembered (localStorage)
 - Data saved per-day in your browser (localStorage) — reopening keeps today's log
