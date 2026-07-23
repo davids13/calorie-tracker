@@ -57,6 +57,9 @@
     weekEmpty: document.getElementById("weekEmpty"),
     exportExcel: document.getElementById("exportExcel"),
     clearDay: document.getElementById("clearDay"),
+    backupData: document.getElementById("backupData"),
+    restoreData: document.getElementById("restoreData"),
+    restoreFile: document.getElementById("restoreFile"),
     scanBtn: document.getElementById("scanBtn"),
     themeToggle: document.getElementById("themeToggle"),
     scanModal: document.getElementById("scanModal"),
@@ -530,6 +533,79 @@
   }
 
   el.exportExcel.addEventListener("click", exportToExcel);
+
+  /* ---------- Backup & Restore (device-to-device via JSON file) ---------- */
+  // Only app data is included, so shared-origin keys from other GitHub Pages
+  // projects on the same username.github.io domain are left untouched.
+  const APP_KEY_RE = /^(cal-|wt-)/;
+
+  function backupData() {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && APP_KEY_RE.test(key)) {
+        data[key] = localStorage.getItem(key);
+      }
+    }
+    const payload = {
+      app: "calorie-tracker",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: data,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "calorie-tracker-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function restoreData(file) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      let payload;
+      try {
+        payload = JSON.parse(reader.result);
+      } catch (e) {
+        alert("That file isn't a valid backup (couldn't read JSON).");
+        return;
+      }
+      if (!payload || payload.app !== "calorie-tracker" || typeof payload.data !== "object" || payload.data === null) {
+        alert("That doesn't look like a Calorie Tracker backup file.");
+        return;
+      }
+      const keys = Object.keys(payload.data).filter((k) => APP_KEY_RE.test(k));
+      if (!keys.length) {
+        alert("No Calorie Tracker data found in that backup.");
+        return;
+      }
+      if (!confirm("Restore " + keys.length + " item(s)? This replaces the matching data on this device.")) {
+        return;
+      }
+      keys.forEach((k) => {
+        const v = payload.data[k];
+        localStorage.setItem(k, typeof v === "string" ? v : JSON.stringify(v));
+      });
+      alert("Backup restored. Reloading…");
+      location.reload();
+    };
+    reader.onerror = () => alert("Could not read that file.");
+    reader.readAsText(file);
+  }
+
+  el.backupData.addEventListener("click", backupData);
+  el.restoreData.addEventListener("click", () => el.restoreFile.click());
+  el.restoreFile.addEventListener("change", () => {
+    const file = el.restoreFile.files && el.restoreFile.files[0];
+    if (file) restoreData(file);
+    el.restoreFile.value = ""; // allow re-selecting the same file later
+  });
 
   /* ---------- Barcode scanning + product lookup ---------- */
   let scanStream = null;
