@@ -3,7 +3,7 @@
 A simple, dependency-free calorie tracking web app. No build step, no server, no accounts.
 
 ## Features
-- Add foods with a name, calorie count, protein, carbs, fat, and salt (grams)
+- Add foods with a name, calorie count, protein, carbs, fat, and salt (grams). A **name** and a **protein** value are required; calories, carbs, fat, and salt are optional and default to 0
 - See total calories, protein, carbs, fat, and salt consumed vs. your daily goals, each with a progress bar
 - Editable daily calorie, protein, carbs, fat, and salt goals
 - Delete individual entries or clear the whole day
