@@ -42,6 +42,11 @@ body {
   display: flex;
   justify-content: center;
   padding: 24px 16px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  -webkit-text-size-adjust: 100%;
 }
 
 .app {
@@ -377,3 +382,83 @@ footer { text-align: center; display: flex; justify-content: center; gap: 20px; 
 .chart-col .col-bar.empty-day { background: var(--surface); }
 .chart-col .col-label { font-size: 0.7rem; color: var(--muted); }
 .chart-col .col-val { font-size: 0.65rem; color: var(--muted); }
+
+/* ===== Mobile responsiveness ===== */
+
+/* Give tappable controls comfortable touch targets */
+button,
+.theme-toggle,
+.modal-close,
+li button.del,
+.link {
+  touch-action: manipulation;
+  min-height: 44px;
+}
+li button.del {
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Tablets / small laptops: let the card breathe a little wider */
+@media (min-width: 700px) {
+  .app { max-width: 520px; }
+}
+
+/* Phones */
+@media (max-width: 480px) {
+  body { padding-top: max(16px, env(safe-area-inset-top)); }
+
+  .app { gap: 16px; }
+
+  section { padding: 16px; border-radius: 14px; }
+
+  header h1 { font-size: 1.35rem; }
+  header { gap: 8px; }
+
+  .protein-total.cal-total { font-size: 1.05rem; }
+  .protein-total { font-size: 1rem; }
+
+  /* Prevent iOS auto-zoom on focus by keeping inputs >= 16px */
+  input,
+  .scan-manual-row input { font-size: 16px; }
+
+  /* Stack the add-food form into a single column for easy thumb entry */
+  form { grid-template-columns: 1fr; }
+
+  /* Two columns of goal fields fit small screens better than auto-fit */
+  .goal-edit { grid-template-columns: 1fr 1fr; }
+
+  /* Weekly averages: 3 columns are cramped for 5 items on phones */
+  .week-avg { grid-template-columns: repeat(2, 1fr); }
+  .avg-item span { font-size: 1.25rem; }
+
+  .chart { height: 110px; gap: 4px; }
+  .chart-col .col-val { display: none; }
+
+  footer { flex-wrap: wrap; gap: 12px; }
+
+  .modal { padding: 16px; }
+  .scan-manual-row { flex-direction: column; }
+  .scan-manual-row button { width: 100%; }
+}
+
+/* Extra-small phones */
+@media (max-width: 360px) {
+  header h1 { font-size: 1.2rem; }
+  .goal-edit { grid-template-columns: 1fr; }
+  .week-avg { grid-template-columns: 1fr; }
+  li { padding: 10px; }
+  li .protein-tag,
+  li .fat-tag,
+  li .salt-tag,
+  li .carbs-tag { margin-right: 8px; font-size: 0.8rem; }
+}
+
+/* Short landscape screens: reduce vertical rhythm so content stays reachable */
+@media (max-height: 480px) and (orientation: landscape) {
+  .app { gap: 12px; }
+  section { padding: 14px; }
+  .chart { height: 90px; }
+}
