@@ -383,6 +383,32 @@ footer { text-align: center; display: flex; justify-content: center; gap: 20px; 
 .chart-col .col-label { font-size: 0.7rem; color: var(--muted); }
 .chart-col .col-val { font-size: 0.65rem; color: var(--muted); }
 
+/* Weight tracking */
+.weight-form { display: flex; gap: 10px; margin-bottom: 16px; }
+.weight-form input { flex: 1; }
+
+.weight-status {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+.weight-current { flex-shrink: 0; }
+.weight-current span { font-size: 1.9rem; font-weight: 700; color: var(--accent); }
+.weight-current small { color: var(--muted); font-size: 0.9rem; }
+.weight-changes { display: flex; flex-direction: column; gap: 4px; }
+.weight-change { font-size: 0.9rem; color: var(--muted); }
+.weight-change.gain { color: var(--accent-2); font-weight: 600; }
+.weight-change.loss { color: var(--accent); font-weight: 600; }
+.weight-change.same { color: var(--muted); font-weight: 600; }
+
+.weight-list .w-date { color: var(--text); }
+.weight-list .w-kg { margin-left: auto; font-weight: 600; color: var(--text); }
+.weight-list .w-delta { margin-left: 12px; font-weight: 600; font-size: 0.85rem; }
+.weight-list .w-delta.gain { color: var(--accent-2); }
+.weight-list .w-delta.loss { color: var(--accent); }
+.weight-list .w-delta.same { color: var(--muted); }
+
 /* ===== Mobile responsiveness ===== */
 
 /* Give tappable controls comfortable touch targets */
