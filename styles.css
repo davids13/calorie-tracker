@@ -90,6 +90,7 @@ section {
 h2 { font-size: 1rem; margin-bottom: 12px; color: var(--muted); font-weight: 600; }
 
 .summary { text-align: center; }
+.summary-heading { text-align: left; }
 .cal-total #consumed { color: var(--accent); }
 
 .bar-wrap {
