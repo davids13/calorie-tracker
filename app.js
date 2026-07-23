@@ -55,6 +55,10 @@
     avgSalt: document.getElementById("avgSalt"),
     chart: document.getElementById("chart"),
     weekEmpty: document.getElementById("weekEmpty"),
+    totalsTabs: document.getElementById("totalsTabs"),
+    totalsRange: document.getElementById("totalsRange"),
+    totalsGrid: document.getElementById("totalsGrid"),
+    totalsEmpty: document.getElementById("totalsEmpty"),
     exportExcel: document.getElementById("exportExcel"),
     clearDay: document.getElementById("clearDay"),
     backupData: document.getElementById("backupData"),
@@ -220,6 +224,7 @@
 
     renderTimeline();
     renderWeek();
+    renderTotals();
   }
 
   function collectPastDays() {
@@ -413,6 +418,138 @@
 
     el.weekEmpty.style.display = logged.length ? "none" : "block";
   }
+
+  /* ---------- Totals by month / 6 months / year ---------- */
+  let totalsPeriod = "month";
+
+  const pad2 = (n) => String(n).padStart(2, "0");
+  const todayIso = () => new Date().toISOString().slice(0, 10);
+
+  function periodStartIso(period) {
+    const [y, m] = todayIso().split("-").map(Number);
+    if (period === "year") return y + "-01-01";
+    if (period === "6month") {
+      let sm = m - 5;
+      let sy = y;
+      while (sm <= 0) {
+        sm += 12;
+        sy--;
+      }
+      return sy + "-" + pad2(sm) + "-01";
+    }
+    // month (current calendar month)
+    return y + "-" + pad2(m) + "-01";
+  }
+
+  function daysInclusive(startIso, endIso) {
+    const a = Date.parse(startIso + "T00:00:00Z");
+    const b = Date.parse(endIso + "T00:00:00Z");
+    return Math.round((b - a) / 86400000) + 1;
+  }
+
+  function addItems(totals, items) {
+    totals.calories += items.reduce((s, e) => s + (e.calories || 0), 0);
+    totals.protein += items.reduce((s, e) => s + (e.protein || 0), 0);
+    totals.carbs += items.reduce((s, e) => s + (e.carbs || 0), 0);
+    totals.fat += items.reduce((s, e) => s + (e.fat || 0), 0);
+    totals.salt += items.reduce((s, e) => s + (e.salt || 0), 0);
+  }
+
+  function sumRange(startIso, endIso) {
+    const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, salt: 0, days: 0 };
+    const today = todayIso();
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith("cal-")) continue;
+      const date = key.slice("cal-".length);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue; // skip goal keys
+      if (date < startIso || date > endIso) continue;
+      if (date === today) continue; // today's live entries added below
+      let items;
+      try {
+        items = JSON.parse(localStorage.getItem(key));
+      } catch (e) {
+        continue;
+      }
+      if (!Array.isArray(items) || items.length === 0) continue;
+      addItems(totals, items);
+      totals.days++;
+    }
+    if (today >= startIso && today <= endIso && entries.length) {
+      addItems(totals, entries);
+      totals.days++;
+    }
+    return totals;
+  }
+
+  function periodLabel(period) {
+    if (period === "year") return "this year";
+    if (period === "6month") return "the last 6 months";
+    return "this month";
+  }
+
+  function renderTotals() {
+    const startIso = periodStartIso(totalsPeriod);
+    const endIso = todayIso();
+    const totals = sumRange(startIso, endIso);
+    const elapsed = daysInclusive(startIso, endIso);
+
+    const fmtStart = new Date(startIso + "T00:00:00").toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    el.totalsRange.textContent =
+      "Since " + fmtStart + " · " + totals.days + " day" + (totals.days === 1 ? "" : "s") + " logged";
+
+    const metrics = [
+      { key: "calories", label: "Calories", unit: "kcal", goal: goal, cls: "cal", dec: false },
+      { key: "protein", label: "Protein", unit: "g", goal: proteinGoal, cls: "protein", dec: false },
+      { key: "carbs", label: "Carbs", unit: "g", goal: carbsGoal, cls: "carbs", dec: false },
+      { key: "fat", label: "Fat", unit: "g", goal: fatGoal, cls: "fat", dec: true },
+      { key: "salt", label: "Salt", unit: "g", goal: saltGoal, cls: "salt", dec: true },
+    ];
+
+    el.totalsGrid.innerHTML = "";
+    metrics.forEach((m) => {
+      const consumed = m.dec ? round1(totals[m.key]) : Math.round(totals[m.key]);
+      const goalTotal = m.dec ? round1(m.goal * elapsed) : Math.round(m.goal * elapsed);
+
+      const card = document.createElement("div");
+      card.className = "totals-item totals-" + m.cls;
+
+      const val = document.createElement("span");
+      val.className = "totals-val";
+      val.textContent = consumed.toLocaleString() + " " + m.unit;
+
+      const label = document.createElement("small");
+      label.className = "totals-label";
+      label.textContent = m.label;
+
+      const goalNote = document.createElement("small");
+      goalNote.className = "totals-goal";
+      goalNote.textContent =
+        m.goal > 0 ? "of " + goalTotal.toLocaleString() + " " + m.unit + " goal" : "no goal set";
+
+      card.append(val, label, goalNote);
+      el.totalsGrid.appendChild(card);
+    });
+
+    el.totalsGrid.style.display = totals.days ? "grid" : "none";
+    el.totalsRange.style.display = totals.days ? "block" : "none";
+    el.totalsEmpty.style.display = totals.days ? "none" : "block";
+    el.totalsEmpty.textContent = "No data logged in " + periodLabel(totalsPeriod) + " yet.";
+  }
+
+  el.totalsTabs.addEventListener("click", (e) => {
+    const btn = e.target.closest(".totals-tab");
+    if (!btn) return;
+    totalsPeriod = btn.getAttribute("data-period");
+    el.totalsTabs.querySelectorAll(".totals-tab").forEach((b) => {
+      b.classList.toggle("active", b === btn);
+    });
+    renderTotals();
+  });
 
   el.today.textContent = new Date().toLocaleDateString(undefined, {
     weekday: "long",
