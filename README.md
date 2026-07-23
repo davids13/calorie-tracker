@@ -4,7 +4,7 @@ A simple, dependency-free calorie tracking web app. No build step, no server, no
 
 ## Features
 - Add foods with a name, calorie count, protein, carbs, fat, and salt (grams). A **name** and a **protein** value are required; calories, carbs, fat, and salt are optional and default to 0
-- See total calories, protein, carbs, fat, and salt consumed vs. your daily goals, each with a progress bar
+- See total calories, protein, carbs, fat, and salt consumed vs. your daily goals, each with a progress bar, under a **Goals** heading
 - Editable daily calorie, protein, carbs, fat, and salt goals
 - Delete individual entries or clear the whole day
 - A brief success banner confirms each time a food entry is added
@@ -55,3 +55,7 @@ The layout is mobile-first and adapts across screen sizes (feature: `make-mobile
 - `app.js` — logic and localStorage persistence
 
 Your data stays on your device. Each day starts a fresh log automatically.
+
+---
+
+© 2026 Davids.org, All rights reserved.
