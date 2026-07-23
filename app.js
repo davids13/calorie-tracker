@@ -441,12 +441,6 @@
     return y + "-" + pad2(m) + "-01";
   }
 
-  function daysInclusive(startIso, endIso) {
-    const a = Date.parse(startIso + "T00:00:00Z");
-    const b = Date.parse(endIso + "T00:00:00Z");
-    return Math.round((b - a) / 86400000) + 1;
-  }
-
   function addItems(totals, items) {
     totals.calories += items.reduce((s, e) => s + (e.calories || 0), 0);
     totals.protein += items.reduce((s, e) => s + (e.protein || 0), 0);
@@ -492,7 +486,6 @@
     const startIso = periodStartIso(totalsPeriod);
     const endIso = todayIso();
     const totals = sumRange(startIso, endIso);
-    const elapsed = daysInclusive(startIso, endIso);
 
     const fmtStart = new Date(startIso + "T00:00:00").toLocaleDateString(undefined, {
       month: "short",
@@ -503,17 +496,16 @@
       "Since " + fmtStart + " · " + totals.days + " day" + (totals.days === 1 ? "" : "s") + " logged";
 
     const metrics = [
-      { key: "calories", label: "Calories", unit: "kcal", goal: goal, cls: "cal", dec: false },
-      { key: "protein", label: "Protein", unit: "g", goal: proteinGoal, cls: "protein", dec: false },
-      { key: "carbs", label: "Carbs", unit: "g", goal: carbsGoal, cls: "carbs", dec: false },
-      { key: "fat", label: "Fat", unit: "g", goal: fatGoal, cls: "fat", dec: true },
-      { key: "salt", label: "Salt", unit: "g", goal: saltGoal, cls: "salt", dec: true },
+      { key: "calories", label: "Calories", unit: "kcal", cls: "cal", dec: false },
+      { key: "protein", label: "Protein", unit: "g", cls: "protein", dec: false },
+      { key: "carbs", label: "Carbs", unit: "g", cls: "carbs", dec: false },
+      { key: "fat", label: "Fat", unit: "g", cls: "fat", dec: true },
+      { key: "salt", label: "Salt", unit: "g", cls: "salt", dec: true },
     ];
 
     el.totalsGrid.innerHTML = "";
     metrics.forEach((m) => {
       const consumed = m.dec ? round1(totals[m.key]) : Math.round(totals[m.key]);
-      const goalTotal = m.dec ? round1(m.goal * elapsed) : Math.round(m.goal * elapsed);
 
       const card = document.createElement("div");
       card.className = "totals-item totals-" + m.cls;
@@ -526,12 +518,7 @@
       label.className = "totals-label";
       label.textContent = m.label;
 
-      const goalNote = document.createElement("small");
-      goalNote.className = "totals-goal";
-      goalNote.textContent =
-        m.goal > 0 ? "of " + goalTotal.toLocaleString() + " " + m.unit + " goal" : "no goal set";
-
-      card.append(val, label, goalNote);
+      card.append(val, label);
       el.totalsGrid.appendChild(card);
     });
 

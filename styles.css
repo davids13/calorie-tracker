@@ -426,7 +426,6 @@ html[data-theme="light"] .totals-tab.active { color: #ffffff; }
 }
 .totals-val { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
 .totals-label { color: var(--text); font-size: 0.8rem; font-weight: 600; }
-.totals-goal { color: var(--muted); font-size: 0.72rem; }
 .totals-protein .totals-val { color: var(--c-protein); }
 .totals-carbs .totals-val { color: var(--c-carbs); }
 .totals-fat .totals-val { color: var(--c-fat); }
