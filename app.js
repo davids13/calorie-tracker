@@ -69,11 +69,11 @@
   };
 
   let entries = load(todayKey(), []);
-  let goal = load(GOAL_KEY, 2000);
-  let proteinGoal = load(PROTEIN_GOAL_KEY, 120);
-  let fatGoal = load(FAT_GOAL_KEY, 70);
-  let saltGoal = load(SALT_GOAL_KEY, 6);
-  let carbsGoal = load(CARBS_GOAL_KEY, 250);
+  let goal = load(GOAL_KEY, 0);
+  let proteinGoal = load(PROTEIN_GOAL_KEY, 0);
+  let fatGoal = load(FAT_GOAL_KEY, 0);
+  let saltGoal = load(SALT_GOAL_KEY, 0);
+  let carbsGoal = load(CARBS_GOAL_KEY, 0);
 
   function load(key, fallback) {
     try {
