@@ -398,9 +398,9 @@ footer { text-align: center; display: flex; justify-content: center; gap: 20px; 
   font-size: 0.8rem;
   color: var(--muted);
 }
-.totals.collapsed .collapse-caret { transform: rotate(-90deg); }
-.totals.collapsed h2 { margin-bottom: 0; }
-.totals.collapsed .totals-body { display: none; }
+.collapsed .collapse-caret { transform: rotate(-90deg); }
+.collapsed h2.section-toggle { margin-bottom: 0; }
+.collapsed .section-body { display: none; }
 
 /* Totals by month / 6 months / year */
 .totals-tabs {

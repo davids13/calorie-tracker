@@ -113,14 +113,23 @@
     </section>
 
     <section class="list">
-      <h2>Today's entries</h2>
-      <ul id="entries"></ul>
-      <p class="empty" id="empty">No food logged yet.</p>
+      <h2 class="section-toggle" data-collapse-key="list" role="button" tabindex="0" aria-expanded="true">
+        <span>Today's entries</span>
+        <span class="collapse-caret" aria-hidden="true">▾</span>
+      </h2>
+      <div class="section-body">
+        <ul id="entries"></ul>
+        <p class="empty" id="empty">No food logged yet.</p>
+      </div>
     </section>
 
     <section class="week">
-      <h2>Last 7 days</h2>
-      <div class="week-avg">
+      <h2 class="section-toggle" data-collapse-key="week" role="button" tabindex="0" aria-expanded="true">
+        <span>Last 7 days</span>
+        <span class="collapse-caret" aria-hidden="true">▾</span>
+      </h2>
+      <div class="section-body">
+        <div class="week-avg">
         <div class="avg-item avg-cal">
           <span id="avgCal">0</span>
           <small>avg kcal/day</small>
@@ -144,14 +153,15 @@
       </div>
       <div class="chart" id="chart"></div>
       <p class="empty" id="weekEmpty">No data for the last 7 days yet.</p>
+      </div>
     </section>
 
     <section class="totals" id="totalsSection">
-      <h2 class="section-toggle" id="totalsToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="totalsBody">
+      <h2 class="section-toggle" id="totalsToggle" data-collapse-key="totals" role="button" tabindex="0" aria-expanded="true" aria-controls="totalsBody">
         <span>Totals</span>
         <span class="collapse-caret" aria-hidden="true">▾</span>
       </h2>
-      <div class="totals-body" id="totalsBody">
+      <div class="totals-body section-body" id="totalsBody">
         <div class="totals-tabs" id="totalsTabs">
           <button type="button" class="totals-tab active" data-period="month">This month</button>
           <button type="button" class="totals-tab" data-period="6month">6 months</button>
@@ -164,9 +174,14 @@
     </section>
 
     <section class="history">
-      <h2>Timeline</h2>
-      <ul id="timeline"></ul>
-      <p class="empty" id="timelineEmpty">No past days recorded yet.</p>
+      <h2 class="section-toggle" data-collapse-key="history" role="button" tabindex="0" aria-expanded="true">
+        <span>Timeline</span>
+        <span class="collapse-caret" aria-hidden="true">▾</span>
+      </h2>
+      <div class="section-body">
+        <ul id="timeline"></ul>
+        <p class="empty" id="timelineEmpty">No past days recorded yet.</p>
+      </div>
     </section>
 
     <footer>

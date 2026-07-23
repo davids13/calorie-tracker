@@ -59,8 +59,6 @@
     totalsRange: document.getElementById("totalsRange"),
     totalsGrid: document.getElementById("totalsGrid"),
     totalsEmpty: document.getElementById("totalsEmpty"),
-    totalsSection: document.getElementById("totalsSection"),
-    totalsToggle: document.getElementById("totalsToggle"),
     exportExcel: document.getElementById("exportExcel"),
     clearDay: document.getElementById("clearDay"),
     backupData: document.getElementById("backupData"),
@@ -540,28 +538,33 @@
     renderTotals();
   });
 
-  // Collapse / expand the Totals section (state remembered)
-  const TOTALS_COLLAPSED_KEY = "cal-totals-collapsed";
-  function applyTotalsCollapsed(collapsed) {
-    el.totalsSection.classList.toggle("collapsed", collapsed);
-    el.totalsToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  // Collapse / expand any section with a .section-toggle header (state remembered)
+  function initCollapsible(toggle) {
+    const section = toggle.closest("section");
+    if (!section) return;
+    const key = "cal-collapsed-" + toggle.getAttribute("data-collapse-key");
+    const apply = (collapsed) => {
+      section.classList.toggle("collapsed", collapsed);
+      toggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    };
+    let collapsed = load(key, false) === true;
+    apply(collapsed);
+    const toggleFn = () => {
+      collapsed = !collapsed;
+      try {
+        localStorage.setItem(key, JSON.stringify(collapsed));
+      } catch (e) {}
+      apply(collapsed);
+    };
+    toggle.addEventListener("click", toggleFn);
+    toggle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleFn();
+      }
+    });
   }
-  let totalsCollapsed = load(TOTALS_COLLAPSED_KEY, false) === true;
-  applyTotalsCollapsed(totalsCollapsed);
-  function toggleTotalsCollapsed() {
-    totalsCollapsed = !totalsCollapsed;
-    try {
-      localStorage.setItem(TOTALS_COLLAPSED_KEY, JSON.stringify(totalsCollapsed));
-    } catch (e) {}
-    applyTotalsCollapsed(totalsCollapsed);
-  }
-  el.totalsToggle.addEventListener("click", toggleTotalsCollapsed);
-  el.totalsToggle.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      toggleTotalsCollapsed();
-    }
-  });
+  document.querySelectorAll(".section-toggle").forEach(initCollapsible);
 
   el.today.textContent = new Date().toLocaleDateString(undefined, {
     weekday: "long",
