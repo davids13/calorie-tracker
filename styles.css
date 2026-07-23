@@ -534,8 +534,8 @@ li button.del {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  transform: translate(-50%, 20px);
+  top: calc(20px + env(safe-area-inset-top));
+  transform: translate(-50%, -20px);
   background: var(--accent);
   color: #0f1420;
   font-weight: 700;
