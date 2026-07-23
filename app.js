@@ -477,7 +477,7 @@
   }
 
   function periodLabel(period) {
-    if (period === "year") return "the year to date";
+    if (period === "year") return "this year";
     if (period === "6month") return "the last 6 months";
     return "this month";
   }
