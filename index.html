@@ -146,16 +146,21 @@
       <p class="empty" id="weekEmpty">No data for the last 7 days yet.</p>
     </section>
 
-    <section class="totals">
-      <h2>Totals</h2>
-      <div class="totals-tabs" id="totalsTabs">
-        <button type="button" class="totals-tab active" data-period="month">This month</button>
-        <button type="button" class="totals-tab" data-period="6month">6 months</button>
-        <button type="button" class="totals-tab" data-period="year">This year</button>
+    <section class="totals" id="totalsSection">
+      <h2 class="section-toggle" id="totalsToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="totalsBody">
+        <span>Totals</span>
+        <span class="collapse-caret" aria-hidden="true">▾</span>
+      </h2>
+      <div class="totals-body" id="totalsBody">
+        <div class="totals-tabs" id="totalsTabs">
+          <button type="button" class="totals-tab active" data-period="month">This month</button>
+          <button type="button" class="totals-tab" data-period="6month">6 months</button>
+          <button type="button" class="totals-tab" data-period="year">This year</button>
+        </div>
+        <p class="totals-range" id="totalsRange"></p>
+        <div class="totals-grid" id="totalsGrid"></div>
+        <p class="empty" id="totalsEmpty">No data logged in this period yet.</p>
       </div>
-      <p class="totals-range" id="totalsRange"></p>
-      <div class="totals-grid" id="totalsGrid"></div>
-      <p class="empty" id="totalsEmpty">No data logged in this period yet.</p>
     </section>
 
     <section class="history">

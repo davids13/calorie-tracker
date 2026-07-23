@@ -59,6 +59,8 @@
     totalsRange: document.getElementById("totalsRange"),
     totalsGrid: document.getElementById("totalsGrid"),
     totalsEmpty: document.getElementById("totalsEmpty"),
+    totalsSection: document.getElementById("totalsSection"),
+    totalsToggle: document.getElementById("totalsToggle"),
     exportExcel: document.getElementById("exportExcel"),
     clearDay: document.getElementById("clearDay"),
     backupData: document.getElementById("backupData"),
@@ -536,6 +538,29 @@
       b.classList.toggle("active", b === btn);
     });
     renderTotals();
+  });
+
+  // Collapse / expand the Totals section (state remembered)
+  const TOTALS_COLLAPSED_KEY = "cal-totals-collapsed";
+  function applyTotalsCollapsed(collapsed) {
+    el.totalsSection.classList.toggle("collapsed", collapsed);
+    el.totalsToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+  }
+  let totalsCollapsed = load(TOTALS_COLLAPSED_KEY, false) === true;
+  applyTotalsCollapsed(totalsCollapsed);
+  function toggleTotalsCollapsed() {
+    totalsCollapsed = !totalsCollapsed;
+    try {
+      localStorage.setItem(TOTALS_COLLAPSED_KEY, JSON.stringify(totalsCollapsed));
+    } catch (e) {}
+    applyTotalsCollapsed(totalsCollapsed);
+  }
+  el.totalsToggle.addEventListener("click", toggleTotalsCollapsed);
+  el.totalsToggle.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggleTotalsCollapsed();
+    }
   });
 
   el.today.textContent = new Date().toLocaleDateString(undefined, {
